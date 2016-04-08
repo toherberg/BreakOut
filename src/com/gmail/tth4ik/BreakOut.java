@@ -11,6 +11,7 @@ public class BreakOut extends ConsoleProgram {
 	public static final int APPLICATION_WIDTH = 400;
 	public static final int APPLICATION_HEIGHT = 600;
 
+	
 /** Dimensions of game board (usually the same) */
 	private static final int WIDTH = APPLICATION_WIDTH;
 	private static final int HEIGHT = APPLICATION_HEIGHT;
@@ -46,6 +47,9 @@ public class BreakOut extends ConsoleProgram {
 
 /** Number of turns */
 	private static final int NTURNS = 3;
+	
+	private static int bricksQuantity = 100;
+	
 	
 	
 	public void run(){
