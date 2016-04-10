@@ -5,8 +5,9 @@ import java.awt.event.MouseEvent;
 
 import acm.graphics.GOval;
 import acm.program.ConsoleProgram;
+import acm.program.GraphicsProgram;
 
-public class BreakOut extends ConsoleProgram {
+public class BreakOut extends GraphicsProgram {
 
 	/** Width and height of application window in pixels */
 	public static final int APPLICATION_WIDTH = 400;
@@ -62,6 +63,33 @@ public class BreakOut extends ConsoleProgram {
 			moveBall();
 		}
 	}
+	
+	private void setup() {
+		createField();
+		createRaquet();
+		addMouseListeners();
+
+	}
+	
+	public void mouseDragged(MouseEvent e) { 
+		System.out.println("hey hey, you clicked mouse");
+	}
+
+	private void createBall() {
+		// створює м'ячик, ставить його у певну позицію
+
+	}
+
+	private void createRaquet() {
+		// створює ракетку, ставить її у певну позицію
+
+	}
+
+	private void createField() {
+		// створює поле - набір цеглинок
+
+	}
+	
 
 	private void moveBall() {
 		// метод, який рухає м'ячик у певному напрямі
@@ -110,27 +138,7 @@ public class BreakOut extends ConsoleProgram {
 
 	}
 
-	private void setup() {
-		createField();
-		createRaquet();
-		// addMouseListener();
 
-	}
-
-	private void createBall() {
-		// створює м'ячик, ставить його у певну позицію
-
-	}
-
-	private void createRaquet() {
-		// створює ракетку, ставить її у певну позицію
-
-	}
-
-	private void createField() {
-		// створює поле - набір цеглинок
-
-	}
 	
 	GOval ball;
 
