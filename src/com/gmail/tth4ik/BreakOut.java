@@ -55,9 +55,13 @@ public class BreakOut extends GraphicsProgram {
 	/** Number of turns */
 	private static final int NTURNS = 3;
 
-	private static int bricksQuantity = 100;
+	private static int bricksQuantity = NBRICK_ROWS*NBRICKS_PER_ROW;
 
 	private static int lifes = 3;
+
+	private static int vx, vy;
+
+	private GRect brick;
 
 	public void run() {
 		setup();
@@ -121,7 +125,7 @@ public class BreakOut extends GraphicsProgram {
 	 * її злегка відбиває
 	 */
 	public void mouseDragged(MouseEvent e) {
-		if ((getElementAt(e.getX(), e.getY()) == null) || (getElementAt(e.getX(), e.getY()) != paddle)) {
+		if ((obj == null) || (obj != paddle)) {
 			return;
 		} else {
 			if (obj.getX() < 0) {
@@ -138,8 +142,7 @@ public class BreakOut extends GraphicsProgram {
 	}
 
 	private void createField() {
-		// створює поле - набір цеглинок
-
+		
 	}
 
 	private void moveBall() {
