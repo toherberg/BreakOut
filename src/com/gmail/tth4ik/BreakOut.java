@@ -4,12 +4,14 @@ import java.awt.Color;
 import java.awt.Event;
 import java.awt.event.MouseEvent;
 
+import acm.graphics.GLabel;
 import acm.graphics.GObject;
 import acm.graphics.GOval;
 import acm.graphics.GPoint;
 import acm.graphics.GRect;
 import acm.program.ConsoleProgram;
 import acm.program.GraphicsProgram;
+import acm.util.RandomGenerator;
 
 public class BreakOut extends GraphicsProgram {
 
@@ -52,26 +54,25 @@ public class BreakOut extends GraphicsProgram {
 	/** Offset of the top brick row from the top */
 	private static final int BRICK_Y_OFFSET = 70;
 
-	/** Number of turns */
-	private static final int NTURNS = 3;
-
-	private static int bricksQuantity = NBRICK_ROWS*NBRICKS_PER_ROW;
+	private int bricksQuantity = NBRICK_ROWS * NBRICKS_PER_ROW;
 
 	private static int lifes = 3;
 
-	private static int vx, vy;
+	/** ball speed */
+	private double vx, vy;
 
-	private GRect brick;
+	private RandomGenerator rgen = RandomGenerator.getInstance();
+
+	private static final int DELAY = 10;
 
 	public void run() {
 		setup();
-		// while (!gameOver()) {
-		if (ball == null) {
-			createBall();
-			throwBall();
-			// }
-			// checkForCollisions();
-			// moveBall();
+		while (!gameOver()) {
+			if (ball == null) {
+				waitForClick();
+				createBall();
+				throwBall();
+			}
 		}
 
 	}
@@ -125,76 +126,193 @@ public class BreakOut extends GraphicsProgram {
 	 * њњ злегка в≥дбиваЇ
 	 */
 	public void mouseDragged(MouseEvent e) {
+		if ((e.getX() < 0) || (e.getX() > APPLICATION_WIDTH))
+			return;
 		if ((obj == null) || (obj != paddle)) {
 			return;
 		} else {
-			if (obj.getX() < 0) {
-				obj.move(5, 0);
+			if (paddle.getX() < 0) {
+				paddle.move(5, 0);
 				return;
 			}
-			if (obj.getX() >= APPLICATION_WIDTH - PADDLE_WIDTH) {
-				obj.move(-5, 0);
+			if (paddle.getX() >= APPLICATION_WIDTH - PADDLE_WIDTH) {
+				paddle.move(-5, 0);
 				return;
 			}
-			obj.move(e.getX() - last.getX(), 0);
+			paddle.move(e.getX() - last.getX(), 0);
 			last = new GPoint(e.getPoint());
 		}
 	}
 
 	private void createField() {
-		
+		int x = BRICK_SEP / 2;
+		int y = BRICK_Y_OFFSET;
+		for (int row = 0; row < NBRICK_ROWS; row++) {
+			for (int column = 0; column < NBRICKS_PER_ROW; column++) {
+				brick = new GRect(x, y, BRICK_WIDTH, BRICK_HEIGHT);
+				add(brick);
+				brick.setFilled(true);
+				if (row < 2)
+					brick.setColor(Color.RED);
+				if (row == 2 || row == 3)
+					brick.setColor(Color.ORANGE);
+				if (row == 4 || row == 5)
+					brick.setColor(Color.YELLOW);
+				if (row == 6 || row == 7)
+					brick.setColor(Color.GREEN);
+				if (row == 8 || row == 9)
+					brick.setColor(Color.CYAN);
+				x += BRICK_WIDTH + BRICK_SEP;
+			}
+			y += (BRICK_HEIGHT + BRICK_SEP);
+			x = BRICK_SEP / 2;
+		}
 	}
 
-	private void moveBall() {
-		// метод, €кий рухаЇ м'€чик у певному напр€м≥
-
-	}
-
+	/**
+	 * ќсновний метод гри - жбурл€Ї м'€чик ≥ рухаЇ його по ≥гровому полю,
+	 * перев≥р€ючи кол≥з≥њ
+	 */
 	private void throwBall() {
-		// метод, жбурл€Ї м'€чик у певному напр€м≥ на початку гри
+		vy = 3.0;
+		vx = rgen.nextDouble(1.0, 3.0);
+		if (rgen.nextBoolean(0.5))
+			vx = -vx;
+		while (true) {
+			ball.move(vx, vy);
+			pause(DELAY);
+			checkForCollisions();
+			if (ballOutOfBottomLine()) {
+				return;
+			}
+		}
 
 	}
 
 	/** ћетод визначаЇ, чи гра зак≥нчена - або користувач виграв, або програв */
 	private boolean gameOver() {
-		if (bricksQuantity == 0)
+		if (bricksQuantity == 0) {
+			remove(ball);
+			ball = null;
+			overLine = new GLabel("CONGRATULATIONS,YOU WIN!");
+			overLine.setFont("Arial-Bold-18");
+			add(overLine, APPLICATION_WIDTH / 2 - overLine.getWidth() / 2,
+					APPLICATION_HEIGHT / 2 - overLine.getHeight() / 2);
 			return true;
-		if (lifes == 0)
+		}
+		if (lifes == 0) {
+			overLine = new GLabel("GAME OVER");
+			overLine.setFont("Arial-Bold-18");
+			add(overLine, APPLICATION_WIDTH / 2 - overLine.getWidth() / 2,
+					APPLICATION_HEIGHT / 2 - overLine.getHeight() / 2);
 			return true;
+		}
 		return false;
 	}
 
+	/**
+	 * ћетод-перев≥рка з≥ткненн€ м'€чика з нижньою ст≥нкою. ѕрибираЇ м'€ч,
+	 * зменшуЇ к≥льк≥сть житт≥в, таким чином даючи програм≥ зрозум≥ти, чи давати
+	 * нове житт€, чи зак≥нчувати гру програшем
+	 */
 	private boolean ballOutOfBottomLine() {
-		// метод дл€ перев≥рки програшу, пад≥нн€ м'€чика за нижнЇ поле екрану
+		if ((ball.getY() + 2 * BALL_RADIUS) > APPLICATION_HEIGHT) {
+			System.out.println(1);
+			remove(ball);
+			ball = null;
+			lifes--;
+			return true;
+		}
 		return false;
 	}
 
+	/**
+	 * метод перев≥р€Ї кол≥з≥њ м'€чика з ус≥м, в≥д чого в≥н може в≥дбитис€ -
+	 * боков≥ ≥ верхн€ ст≥нка, ракетка, цеглинки
+	 */
 	private void checkForCollisions() {
+		if (gameOver())
+			return;
 		collideWithWalls();
 		collideWithBricks();
 		collideWithRaquet();
 
 	}
 
+	/**
+	 * ћетод, €кий перев≥р€Ї чи з≥ткнувс€ м'€чик з ракеткою, €кщо так - в≥дбиваЇ
+	 * його
+	 */
 	private void collideWithRaquet() {
-		// перев≥р€Ї м'€ч на з≥ткненн€ з ракеткою, в≥дбиваЇ м'€чик
+		if (getElementAt(ball.getX(), ball.getY() + 2 * BALL_RADIUS) == paddle) {
+			if (vy > 0)
+				vy = -vy;
+			return;
+		}
+		if (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()) == paddle) {
+			if (vy > 0)
+				vy = -vy;
+			return;
+		}
 
 	}
 
+	/**
+	 * ѕерев≥р€Ї з≥ткненн€ з цеглинками, у випадку, €кщо воно в≥дбулос€ -
+	 * видал€Ї цеглинку, зменшуЇ њх к≥льк≥сть у в≥дпов≥дн≥й зм≥нн≥й
+	 */
 	private void collideWithBricks() {
-		// перев≥р€Ї на з≥ткненн€ з цеглинками, видал€Ї цеглинки, в≥дбиваЇ
-		// м'€чик
-
+		if ((getElementAt(ball.getX(), ball.getY()) != null) && (getElementAt(ball.getX(), ball.getY()) != paddle)) {
+			remove(getElementAt(ball.getX(), ball.getY()));
+			brick = null;
+			vy = -vy;
+			bricksQuantity--;
+			return;
+		}
+		if ((getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()) != null)
+				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()) != paddle)) {
+			remove(getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()));
+			brick = null;
+			vy = -vy;
+			bricksQuantity--;
+			return;
+		}
+		if ((getElementAt(ball.getX(), ball.getY() + 2 * BALL_RADIUS) != null)
+				&& (getElementAt(ball.getX(), ball.getY() + 2 * BALL_RADIUS) != paddle)) {
+			remove(getElementAt(ball.getX(), ball.getY() + 2 * BALL_RADIUS));
+			brick = null;
+			vy = -vy;
+			bricksQuantity--;
+			return;
+		}
+		if ((getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != null)
+				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != paddle)) {
+			remove(getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS));
+			brick = null;
+			vy = -vy;
+			bricksQuantity--;
+			return;
+		}
 	}
 
+	/**
+	 * метод перев≥р€Ї чи Ї з≥ткненн€ м'€чика з≥ ст≥нкою, €кщо так - в≥дбиваЇ
+	 * його
+	 */
 	private void collideWithWalls() {
-		// з≥ткненн€ з≥ ст≥нками, в≥дбитт€ в≥д ст≥нок
+		if ((ball.getX() + 2 * BALL_RADIUS) >= APPLICATION_WIDTH)
+			vx = -vx;
+		if ((ball.getX()) <= 0)
+			vx = -vx;
+		if (ball.getY() <= 0)
+			vy = -vy;
 
 	}
 
 	private GOval ball;
+	private GRect brick;
 	private GRect paddle;
 	private GObject obj;
 	private GPoint last;
-
+	private GLabel overLine;
 }
