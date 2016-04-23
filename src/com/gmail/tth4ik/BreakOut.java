@@ -63,7 +63,7 @@ public class BreakOut extends GraphicsProgram {
 
 	private RandomGenerator rgen = RandomGenerator.getInstance();
 
-	private static final int DELAY = 10;
+	private static final int DELAY = 1;
 
 	public void run() {
 		setup();
@@ -96,6 +96,7 @@ public class BreakOut extends GraphicsProgram {
 		ball.setFillColor(Color.RED);
 		ball.setColor(Color.RED);
 		add(ball, APPLICATION_WIDTH / 2 - BALL_RADIUS, APPLICATION_HEIGHT / 2 - BALL_RADIUS);
+		ball.sendToBack();
 
 	}
 
@@ -261,7 +262,6 @@ public class BreakOut extends GraphicsProgram {
 	 * видаляє цеглинку, зменшує їх кількість у відповідній змінній
 	 */
 	private void collideWithBricks() {
-		ball.sendToBack();
 		if ((getElementAt(ball.getX() + BALL_RADIUS, ball.getY()) != null)
 				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY()) != paddle)
 				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY()) != ball)) {
