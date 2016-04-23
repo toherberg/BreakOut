@@ -27,7 +27,7 @@ public class BreakOut extends GraphicsProgram {
 	private static final int HEIGHT = APPLICATION_HEIGHT;
 
 	/** Dimensions of the paddle */
-	private static final int PADDLE_WIDTH = 500;
+	private static final int PADDLE_WIDTH = 60;
 	private static final int PADDLE_HEIGHT = 10;
 
 	/** Offset of the paddle up from the bottom */
@@ -46,7 +46,7 @@ public class BreakOut extends GraphicsProgram {
 	private static final int BRICK_WIDTH = (WIDTH - (NBRICKS_PER_ROW - 1) * BRICK_SEP) / NBRICKS_PER_ROW;
 
 	/** Height of a brick */
-	private static final int BRICK_HEIGHT = 15;
+	private static final int BRICK_HEIGHT = 8;
 
 	/** Radius of the ball in pixels */
 	private static final int BALL_RADIUS = 10;
@@ -63,13 +63,16 @@ public class BreakOut extends GraphicsProgram {
 
 	private RandomGenerator rgen = RandomGenerator.getInstance();
 
-	private static final int DELAY = 1;
+	/** затримка, її можна зробити меншою, аби гра була швидшою */
+	private static final int DELAY = 10;
 
 	public void run() {
 		setup();
-		while (true) {
+		while (!gameOver()) {
 			if (ball == null) {
-				waitForClick();
+				waitForClick(); // гра в цілому і кожне наступне життя перед
+								// запуском м'ячика розпочинається після кліку
+								// мишки
 				createBall();
 				throwBall();
 			}
@@ -145,6 +148,7 @@ public class BreakOut extends GraphicsProgram {
 		}
 	}
 
+	/*** створює поле з цеглинок */
 	private void createField() {
 		int x = BRICK_SEP / 2;
 		int y = BRICK_Y_OFFSET;
@@ -241,7 +245,12 @@ public class BreakOut extends GraphicsProgram {
 
 	/**
 	 * Метод, який перевіряє чи зіткнувся м'ячик з ракеткою, якщо так - відбиває
-	 * його
+	 * його. Завдяки умові if (vy > 0) виправлено проблему з прилипанням м'яча,
+	 * яка виникала через те, що м'яч відбиваючись на краю ракетки (нагадаю, ми
+	 * перевіряємо 4 точки по краях квадрата, у який вписано наш м'ячик)
+	 * потрапляв у площину ракетки і знову відбивався від неї у протилежну
+	 * сторону, таким чином виникало явище, ніби м'яч відбивається вверх-вниз
+	 * всередині ракетки. Тепер такого явища немає.
 	 */
 	private void collideWithRaquet() {
 		if (getElementAt(ball.getX(), ball.getY() + 2 * BALL_RADIUS) == paddle) {
@@ -259,7 +268,13 @@ public class BreakOut extends GraphicsProgram {
 
 	/**
 	 * Перевіряє зіткнення з цеглинками, у випадку, якщо воно відбулося -
-	 * видаляє цеглинку, зменшує їх кількість у відповідній змінній
+	 * видаляє цеглинку, зменшує їх кількість у відповідній змінній. Варто
+	 * зазначити, що метод перевіряє місця відбиття цеглинки - якщо удар припав
+	 * на нижню або верхню частинку - змінюється на протилежну швидкість по осі
+	 * y. Якщо м'ячик ударився об один з боків цеглинки - змінюється на
+	 * протилежну швидкість по осі x. Для того, аби це бул краще видно (відбиття
+	 * від різних частин цеглинки, краще зробити висоти цеглибки більшою, ніж
+	 * була дана нам у файлі "starter", або ж зменшити величину м'яча.
 	 */
 	private void collideWithBricks() {
 		if ((getElementAt(ball.getX() + BALL_RADIUS, ball.getY()) != null)
@@ -293,9 +308,9 @@ public class BreakOut extends GraphicsProgram {
 			return;
 		}
 		if ((getElementAt(ball.getX(), ball.getY() + BALL_RADIUS) != null)
-				&& (getElementAt(ball.getX(), ball.getY()+BALL_RADIUS) != paddle)
-				&& (getElementAt(ball.getX(), ball.getY()+BALL_RADIUS) != ball)) {
-			collider = getElementAt(ball.getX(), ball.getY()+BALL_RADIUS);
+				&& (getElementAt(ball.getX(), ball.getY() + BALL_RADIUS) != paddle)
+				&& (getElementAt(ball.getX(), ball.getY() + BALL_RADIUS) != ball)) {
+			collider = getElementAt(ball.getX(), ball.getY() + BALL_RADIUS);
 			remove(collider);
 			collider = null;
 			bricksQuantity--;
