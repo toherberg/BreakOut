@@ -27,7 +27,7 @@ public class BreakOut extends GraphicsProgram {
 	private static final int HEIGHT = APPLICATION_HEIGHT;
 
 	/** Dimensions of the paddle */
-	private static final int PADDLE_WIDTH = 60;
+	private static final int PADDLE_WIDTH = 500;
 	private static final int PADDLE_HEIGHT = 10;
 
 	/** Offset of the paddle up from the bottom */
@@ -46,7 +46,7 @@ public class BreakOut extends GraphicsProgram {
 	private static final int BRICK_WIDTH = (WIDTH - (NBRICKS_PER_ROW - 1) * BRICK_SEP) / NBRICKS_PER_ROW;
 
 	/** Height of a brick */
-	private static final int BRICK_HEIGHT = 8;
+	private static final int BRICK_HEIGHT = 15;
 
 	/** Radius of the ball in pixels */
 	private static final int BALL_RADIUS = 10;
@@ -67,7 +67,7 @@ public class BreakOut extends GraphicsProgram {
 
 	public void run() {
 		setup();
-		while (!gameOver()) {
+		while (true) {
 			if (ball == null) {
 				waitForClick();
 				createBall();
@@ -178,7 +178,7 @@ public class BreakOut extends GraphicsProgram {
 		vx = rgen.nextDouble(1.0, 3.0);
 		if (rgen.nextBoolean(0.5))
 			vx = -vx;
-		while (true) {
+		while (!gameOver()) {
 			ball.move(vx, vy);
 			pause(DELAY);
 			checkForCollisions();
@@ -193,7 +193,6 @@ public class BreakOut extends GraphicsProgram {
 	private boolean gameOver() {
 		if (bricksQuantity == 0) {
 			remove(ball);
-			ball = null;
 			overLine = new GLabel("CONGRATULATIONS,YOU WIN!");
 			overLine.setFont("Arial-Bold-18");
 			add(overLine, APPLICATION_WIDTH / 2 - overLine.getWidth() / 2,
@@ -262,37 +261,48 @@ public class BreakOut extends GraphicsProgram {
 	 * видаляє цеглинку, зменшує їх кількість у відповідній змінній
 	 */
 	private void collideWithBricks() {
-		if ((getElementAt(ball.getX(), ball.getY()) != null) && (getElementAt(ball.getX(), ball.getY()) != paddle)) {
-			remove(getElementAt(ball.getX(), ball.getY()));
-			brick = null;
-			vy = -vy;
+		ball.sendToBack();
+		if ((getElementAt(ball.getX() + BALL_RADIUS, ball.getY()) != null)
+				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY()) != paddle)
+				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY()) != ball)) {
+			collider = getElementAt(ball.getX() + BALL_RADIUS, ball.getY());
+			remove(collider);
+			collider = null;
 			bricksQuantity--;
+			vy = -vy;
 			return;
 		}
-		if ((getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()) != null)
-				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()) != paddle)) {
-			remove(getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()));
-			brick = null;
-			vy = -vy;
+		if ((getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) != null)
+				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) != paddle)
+				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) != ball)) {
+			collider = getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS);
+			remove(collider);
+			collider = null;
 			bricksQuantity--;
+			vx = -vx;
 			return;
 		}
-		if ((getElementAt(ball.getX(), ball.getY() + 2 * BALL_RADIUS) != null)
-				&& (getElementAt(ball.getX(), ball.getY() + 2 * BALL_RADIUS) != paddle)) {
-			remove(getElementAt(ball.getX(), ball.getY() + 2 * BALL_RADIUS));
-			brick = null;
-			vy = -vy;
+		if ((getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != null)
+				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != paddle)
+				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != ball)) {
+			collider = getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS);
+			remove(collider);
+			collider = null;
 			bricksQuantity--;
+			vy = -vy;
 			return;
 		}
-		if ((getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != null)
-				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != paddle)) {
-			remove(getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS));
-			brick = null;
-			vy = -vy;
+		if ((getElementAt(ball.getX(), ball.getY() + BALL_RADIUS) != null)
+				&& (getElementAt(ball.getX(), ball.getY()+BALL_RADIUS) != paddle)
+				&& (getElementAt(ball.getX(), ball.getY()+BALL_RADIUS) != ball)) {
+			collider = getElementAt(ball.getX(), ball.getY()+BALL_RADIUS);
+			remove(collider);
+			collider = null;
 			bricksQuantity--;
+			vx = -vx;
 			return;
 		}
+
 	}
 
 	/**
@@ -315,4 +325,5 @@ public class BreakOut extends GraphicsProgram {
 	private GObject obj;
 	private GPoint last;
 	private GLabel overLine;
+	private GObject collider;
 }
