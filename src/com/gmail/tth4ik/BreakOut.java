@@ -1,5 +1,15 @@
 package com.gmail.tth4ik;
 
+/**Комп'ютерна гра - BreakOut. Щоб вкинути м'ячик потрібно клікнути на екран. 
+ * Найзручніше це зробити, нажавши кнопку миші на ракетці, аби взяти над нею контроль одразу і бути готовим до відбиття м'ячика
+ * Керування - перетягуванням миші - потрібно нажати кнопку миші на ракетці і потім, утримуючи кнопку миші, можна її рухати. 
+ * Швидкість можна змінити, зменшивши змінну DELAY (затримку). Також можна збільшити кількість життів, змінивши значення відповідної змінної lifes
+ * У гру додано звук, він програється після кожного зіткнення з ракеткою/стінкою/цеглинкою. 
+ * У кожного гравця - 3 життя. Якщо він тричі не зміг відбити м'яч ракеткою - гра закінчується і гравця про це повідомляє. 
+ * Аби виграти - треба збити усі цеглинки. Тоді гра зупиняється і гравцеві виводиться привітання
+ * */
+
+import java.applet.AudioClip;
 import java.awt.Color;
 import java.awt.Event;
 import java.awt.event.MouseEvent;
@@ -11,12 +21,11 @@ import acm.graphics.GPoint;
 import acm.graphics.GRect;
 import acm.program.ConsoleProgram;
 import acm.program.GraphicsProgram;
+import acm.util.MediaTools;
 import acm.util.RandomGenerator;
+import acm.util.SoundClip;
 
 public class BreakOut extends GraphicsProgram {
-
-	// Кольори рядків цеглинок (зверху вниз) - RED(2 верхні рядки) ORANGE,
-	// YELLOW, GREEN, CYAN (2 нижні рядки.
 
 	/** Width and height of application window in pixels */
 	public static final int APPLICATION_WIDTH = 400;
@@ -77,7 +86,6 @@ public class BreakOut extends GraphicsProgram {
 				throwBall();
 			}
 		}
-
 	}
 
 	/**
@@ -85,6 +93,8 @@ public class BreakOut extends GraphicsProgram {
 	 * ракетку і додає слухачів дій мишки
 	 */
 	private void setup() {
+		bounceClip = new SoundClip("bounce.au");
+		bounceClip.setVolume(0.5);
 		this.setSize(APPLICATION_WIDTH, APPLICATION_HEIGHT);
 		createField();
 		createRaquet();
@@ -194,7 +204,13 @@ public class BreakOut extends GraphicsProgram {
 
 	}
 
-	/** Метод визначає, чи гра закінчена - або користувач виграв, або програв */
+	/**
+	 * Метод визначає, чи гра закінчена - або користувач виграв, або програв.
+	 * Перемогу визначає, якщо користувач збив усі цеглинки, програш - якщо
+	 * витратив усі життя. У випадку виграшу, чи програшу - програма виводить
+	 * витирає м'ячик з екрану і виводить у центрі ігрового поля відповідний
+	 * напис - або інформацію про програш, або привітання з перемогою
+	 */
 	private boolean gameOver() {
 		if (bricksQuantity == 0) {
 			remove(ball);
@@ -221,7 +237,6 @@ public class BreakOut extends GraphicsProgram {
 	 */
 	private boolean ballOutOfBottomLine() {
 		if ((ball.getY() + 2 * BALL_RADIUS) > APPLICATION_HEIGHT) {
-			System.out.println(1);
 			remove(ball);
 			ball = null;
 			lifes--;
@@ -245,24 +260,55 @@ public class BreakOut extends GraphicsProgram {
 
 	/**
 	 * Метод, який перевіряє чи зіткнувся м'ячик з ракеткою, якщо так - відбиває
-	 * його. Завдяки умові if (vy > 0) виправлено проблему з прилипанням м'яча,
-	 * яка виникала через те, що м'яч відбиваючись на краю ракетки (нагадаю, ми
-	 * перевіряємо 4 точки по краях квадрата, у який вписано наш м'ячик)
-	 * потрапляв у площину ракетки і знову відбивався від неї у протилежну
-	 * сторону, таким чином виникало явище, ніби м'яч відбивається вверх-вниз
-	 * всередині ракетки. Тепер такого явища немає.
+	 * його. Розроблено 2 варіанти відбиття м'яча.
+	 * 
+	 * ВАРІАНТ, який НЕ ЗАКОМЕНТОВАНИЙ Завдяки умові if (vy > 0) виправлено
+	 * проблему з прилипанням м'яча, яка виникала через те, що м'яч відбиваючись
+	 * на краю ракетки (нагадаю, ми перевіряємо 4 точки по краях квадрата, у
+	 * який вписано наш м'ячик) потрапляв у площину ракетки і знову відбивався
+	 * від неї у протилежну сторону, таким чином виникало явище, ніби м'яч
+	 * відбивається вверх-вниз всередині ракетки. Тепер такого явища немає. У
+	 * цьому варіанті є один візуальний недоліки - інколи м'яч може ніби
+	 * "западати" у дощечку, однак це не викликає жодних перебоїв у роботі
+	 * програми. Така ситуація виникає через те, що ми перевіряємо у ньому
+	 * колізії не власне м'ячика, а точок на вершинах квадрату, в який вписаний
+	 * наш м'ячик ( як це було вказано у пояснювальному матеріалі до
+	 * лабораторної)
+	 * 
+	 * ВАРІАНТ, ЯКИЙ ЗАКОМЕНТОВАНИЙ: Якщо м'ячик нижньою центральною точкою
+	 * потрапляє на верхню частину дощечки - він відбивається, змінюючи на
+	 * протилежну швидкість vy, тобто змінює на протилежний напрям руху по осі
+	 * у. Якщо ж м'яч вдаряється об бокові стінки крайніми боковими точками, то
+	 * подібно того, як від стінки відбивається у протилежному напрямку по осі х
+	 * і падає вниз.
 	 */
 	private void collideWithRaquet() {
+
 		if (getElementAt(ball.getX(), ball.getY() + 2 * BALL_RADIUS) == paddle) {
 			if (vy > 0)
 				vy = -vy;
+			bounceClip.play();
 			return;
-		}
-		if (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()) == paddle) {
+		} else if (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()) == paddle) {
 			if (vy > 0)
 				vy = -vy;
+			bounceClip.play();
 			return;
 		}
+
+		/*
+		 * if (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 *
+		 * BALL_RADIUS) == paddle) { if (ball.getY() + 2 * BALL_RADIUS >=
+		 * paddle.getY()) { vy = -vy; return; } } if (getElementAt(ball.getX()
+		 * +2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) == paddle) { if
+		 * ((ball.getX() + 2 * BALL_RADIUS >= paddle.getX())) {
+		 * System.out.println(true); vx = -vx; return; } } if
+		 * (getElementAt(ball.getX(), ball.getY() + BALL_RADIUS) == paddle) { if
+		 * (ball.getX() <= paddle.getX() + PADDLE_WIDTH) {
+		 * System.out.println(true); vx = -vx; return; }
+		 * 
+		 * }
+		 */
 
 	}
 
@@ -272,9 +318,18 @@ public class BreakOut extends GraphicsProgram {
 	 * зазначити, що метод перевіряє місця відбиття цеглинки - якщо удар припав
 	 * на нижню або верхню частинку - змінюється на протилежну швидкість по осі
 	 * y. Якщо м'ячик ударився об один з боків цеглинки - змінюється на
-	 * протилежну швидкість по осі x. Для того, аби це бул краще видно (відбиття
-	 * від різних частин цеглинки, краще зробити висоти цеглибки більшою, ніж
-	 * була дана нам у файлі "starter", або ж зменшити величину м'яча.
+	 * протилежну швидкість по осі x. Для того, аби це булj краще видно
+	 * (відбиття від різних частин цеглинки, краще зробити висоти цеглибки
+	 * більшою, ніж була дана нам у файлі "starter", або ж зменшити величину
+	 * м'яча. Зазначимо, що метод перевіряє зіткнення не з точками, які є за
+	 * межами кола (вершини квадрата у який вписаний наш м'ячик), як це було
+	 * дано в пояснювальному матеріалі до лабораторної, а перевіряє
+	 * безпосередньо чотири точки на колі. Успішної перевірки колізій з точками
+	 * на колі вдалося досягти завдяки тому, що при створенні м'ячик
+	 * переміщується на задній план. Таким чином, коли ми беремо елемент у
+	 * точці, то програма повертає нам не м'ячик (як було б, якби м'яч був на
+	 * передньому плані), а цеглинку, тому що всі інші елементи, які можуть бути
+	 * на полі наш метод перевірки колізій з цеглинками ігнорує
 	 */
 	private void collideWithBricks() {
 		if ((getElementAt(ball.getX() + BALL_RADIUS, ball.getY()) != null)
@@ -284,6 +339,7 @@ public class BreakOut extends GraphicsProgram {
 			remove(collider);
 			collider = null;
 			bricksQuantity--;
+			bounceClip.play();
 			vy = -vy;
 			return;
 		}
@@ -294,6 +350,7 @@ public class BreakOut extends GraphicsProgram {
 			remove(collider);
 			collider = null;
 			bricksQuantity--;
+			bounceClip.play();
 			vx = -vx;
 			return;
 		}
@@ -304,6 +361,7 @@ public class BreakOut extends GraphicsProgram {
 			remove(collider);
 			collider = null;
 			bricksQuantity--;
+			bounceClip.play();
 			vy = -vy;
 			return;
 		}
@@ -314,6 +372,7 @@ public class BreakOut extends GraphicsProgram {
 			remove(collider);
 			collider = null;
 			bricksQuantity--;
+			bounceClip.play();
 			vx = -vx;
 			return;
 		}
@@ -322,18 +381,25 @@ public class BreakOut extends GraphicsProgram {
 
 	/**
 	 * метод перевіряє чи є зіткнення м'ячика зі стінкою, якщо так - відбиває
-	 * його
+	 * його. У основі лежить перевірка чи відповідна координата м'ячика виходить
+	 * за межі чи дорівнює відповідним координатам краю ігрового поля.
 	 */
 	private void collideWithWalls() {
-		if ((ball.getX() + 2 * BALL_RADIUS) >= APPLICATION_WIDTH)
+		if ((ball.getX() + 2 * BALL_RADIUS) >= APPLICATION_WIDTH) {
+			bounceClip.play();
 			vx = -vx;
-		if ((ball.getX()) <= 0)
+		}
+		if ((ball.getX()) <= 0) {
+			bounceClip.play();
 			vx = -vx;
-		if (ball.getY() <= 0)
+		}
+		if (ball.getY() <= 0) {
+			bounceClip.play();
 			vy = -vy;
-
+		}
 	}
 
+	private SoundClip bounceClip;
 	private GOval ball;
 	private GRect brick;
 	private GRect paddle;
