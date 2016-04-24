@@ -25,18 +25,23 @@ import acm.util.MediaTools;
 import acm.util.RandomGenerator;
 import acm.util.SoundClip;
 
+/**
+ * Ми змінили висоту цеглинки, аби було зрозумілішим і очевиднішим, як м'ячик
+ * відбивається від боків і верхньої і нижньої частинки цеглин. Для того аби
+ * зробити гру пропорційнішою ми дещо збільшили і ширину вікна, і ширину ракетки
+ */
 public class BreakOut extends GraphicsProgram {
 
 	/** Width and height of application window in pixels */
-	public static final int APPLICATION_WIDTH = 400;
-	public static final int APPLICATION_HEIGHT = 600;
+	public static final int APPLICATION_WIDTH = 500;
+	public static final int APPLICATION_HEIGHT = 800;
 
 	/** Dimensions of game board (usually the same) */
 	private static final int WIDTH = APPLICATION_WIDTH;
 	private static final int HEIGHT = APPLICATION_HEIGHT;
 
 	/** Dimensions of the paddle */
-	private static final int PADDLE_WIDTH = 60;
+	private static final int PADDLE_WIDTH = 75;
 	private static final int PADDLE_HEIGHT = 10;
 
 	/** Offset of the paddle up from the bottom */
@@ -52,10 +57,12 @@ public class BreakOut extends GraphicsProgram {
 	private static final int BRICK_SEP = 4;
 
 	/** Width of a brick */
-	private static final int BRICK_WIDTH = (WIDTH - (NBRICKS_PER_ROW - 1) * BRICK_SEP) / NBRICKS_PER_ROW;
+	private static final int BRICK_WIDTH = (WIDTH - (NBRICKS_PER_ROW - 1)
+			* BRICK_SEP)
+			/ NBRICKS_PER_ROW;
 
 	/** Height of a brick */
-	private static final int BRICK_HEIGHT = 8;
+	private static final int BRICK_HEIGHT = 20;
 
 	/** Radius of the ball in pixels */
 	private static final int BALL_RADIUS = 10;
@@ -108,7 +115,8 @@ public class BreakOut extends GraphicsProgram {
 		ball.setFilled(true);
 		ball.setFillColor(Color.RED);
 		ball.setColor(Color.RED);
-		add(ball, APPLICATION_WIDTH / 2 - BALL_RADIUS, APPLICATION_HEIGHT / 2 - BALL_RADIUS);
+		add(ball, APPLICATION_WIDTH / 2 - BALL_RADIUS, APPLICATION_HEIGHT / 2
+				- BALL_RADIUS);
 		ball.sendToBack();
 
 	}
@@ -118,7 +126,8 @@ public class BreakOut extends GraphicsProgram {
 		paddle = new GRect(PADDLE_WIDTH, PADDLE_HEIGHT);
 		paddle.setFilled(true);
 		paddle.setFillColor(Color.BLACK);
-		add(paddle, APPLICATION_WIDTH / 2 - PADDLE_WIDTH / 2, APPLICATION_HEIGHT - PADDLE_HEIGHT - PADDLE_Y_OFFSET);
+		add(paddle, APPLICATION_WIDTH / 2 - PADDLE_WIDTH / 2,
+				APPLICATION_HEIGHT - PADDLE_HEIGHT - PADDLE_Y_OFFSET);
 	}
 
 	/**
@@ -321,15 +330,16 @@ public class BreakOut extends GraphicsProgram {
 	 * протилежну швидкість по осі x. Для того, аби це булj краще видно
 	 * (відбиття від різних частин цеглинки, краще зробити висоти цеглибки
 	 * більшою, ніж була дана нам у файлі "starter", або ж зменшити величину
-	 * м'яча. Зазначимо, що метод перевіряє зіткнення не з точками, які є за
-	 * межами кола (вершини квадрата у який вписаний наш м'ячик), як це було
-	 * дано в пояснювальному матеріалі до лабораторної, а перевіряє
-	 * безпосередньо чотири точки на колі. Успішної перевірки колізій з точками
-	 * на колі вдалося досягти завдяки тому, що при створенні м'ячик
-	 * переміщується на задній план. Таким чином, коли ми беремо елемент у
-	 * точці, то програма повертає нам не м'ячик (як було б, якби м'яч був на
-	 * передньому плані), а цеглинку, тому що всі інші елементи, які можуть бути
-	 * на полі наш метод перевірки колізій з цеглинками ігнорує
+	 * м'яча (у підсумку ми змінили висоту цеглинок). Зазначимо,
+	 * що метод перевіряє зіткнення не з точками, які є за межами кола (вершини
+	 * квадрата у який вписаний наш м'ячик), як це було дано в пояснювальному
+	 * матеріалі до лабораторної, а перевіряє безпосередньо чотири точки на
+	 * колі. Успішної перевірки колізій з точками на колі вдалося досягти
+	 * завдяки тому, що при створенні м'ячик переміщується на задній план. Таким
+	 * чином, коли ми беремо елемент у точці, то програма повертає нам не м'ячик
+	 * (як було б, якби м'яч був на передньому плані), а цеглинку, тому що всі
+	 * інші елементи, які можуть бути на полі наш метод перевірки колізій з
+	 * цеглинками ігнорує
 	 */
 	private void collideWithBricks() {
 		if ((getElementAt(ball.getX() + BALL_RADIUS, ball.getY()) != null)
@@ -343,10 +353,14 @@ public class BreakOut extends GraphicsProgram {
 			vy = -vy;
 			return;
 		}
-		if ((getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) != null)
-				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) != paddle)
-				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) != ball)) {
-			collider = getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS);
+		if ((getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()
+				+ BALL_RADIUS) != null)
+				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()
+						+ BALL_RADIUS) != paddle)
+				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()
+						+ BALL_RADIUS) != ball)) {
+			collider = getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()
+					+ BALL_RADIUS);
 			remove(collider);
 			collider = null;
 			bricksQuantity--;
@@ -354,10 +368,14 @@ public class BreakOut extends GraphicsProgram {
 			vx = -vx;
 			return;
 		}
-		if ((getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != null)
-				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != paddle)
-				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != ball)) {
-			collider = getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS);
+		if ((getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2
+				* BALL_RADIUS) != null)
+				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2
+						* BALL_RADIUS) != paddle)
+				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2
+						* BALL_RADIUS) != ball)) {
+			collider = getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2
+					* BALL_RADIUS);
 			remove(collider);
 			collider = null;
 			bricksQuantity--;
