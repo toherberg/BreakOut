@@ -57,9 +57,7 @@ public class BreakOut extends GraphicsProgram {
 	private static final int BRICK_SEP = 4;
 
 	/** Width of a brick */
-	private static final int BRICK_WIDTH = (WIDTH - (NBRICKS_PER_ROW - 1)
-			* BRICK_SEP)
-			/ NBRICKS_PER_ROW;
+	private static final int BRICK_WIDTH = (WIDTH - (NBRICKS_PER_ROW - 1) * BRICK_SEP) / NBRICKS_PER_ROW;
 
 	/** Height of a brick */
 	private static final int BRICK_HEIGHT = 20;
@@ -115,8 +113,7 @@ public class BreakOut extends GraphicsProgram {
 		ball.setFilled(true);
 		ball.setFillColor(Color.RED);
 		ball.setColor(Color.RED);
-		add(ball, APPLICATION_WIDTH / 2 - BALL_RADIUS, APPLICATION_HEIGHT / 2
-				- BALL_RADIUS);
+		add(ball, APPLICATION_WIDTH / 2 - BALL_RADIUS, APPLICATION_HEIGHT / 2 - BALL_RADIUS);
 		ball.sendToBack();
 
 	}
@@ -126,8 +123,7 @@ public class BreakOut extends GraphicsProgram {
 		paddle = new GRect(PADDLE_WIDTH, PADDLE_HEIGHT);
 		paddle.setFilled(true);
 		paddle.setFillColor(Color.BLACK);
-		add(paddle, APPLICATION_WIDTH / 2 - PADDLE_WIDTH / 2,
-				APPLICATION_HEIGHT - PADDLE_HEIGHT - PADDLE_Y_OFFSET);
+		add(paddle, APPLICATION_WIDTH / 2 - PADDLE_WIDTH / 2, APPLICATION_HEIGHT - PADDLE_HEIGHT - PADDLE_Y_OFFSET);
 	}
 
 	/**
@@ -271,7 +267,7 @@ public class BreakOut extends GraphicsProgram {
 	 * Метод, який перевіряє чи зіткнувся м'ячик з ракеткою, якщо так - відбиває
 	 * його. Розроблено 2 варіанти відбиття м'яча.
 	 * 
-	 * ВАРІАНТ, який НЕ ЗАКОМЕНТОВАНИЙ Завдяки умові if (vy > 0) виправлено
+	 * ВАРІАНТ, який ЗАКОМЕНТОВАНИЙ Завдяки умові if (vy > 0) виправлено
 	 * проблему з прилипанням м'яча, яка виникала через те, що м'яч відбиваючись
 	 * на краю ракетки (нагадаю, ми перевіряємо 4 точки по краях квадрата, у
 	 * який вписано наш м'ячик) потрапляв у площину ракетки і знову відбивався
@@ -284,15 +280,20 @@ public class BreakOut extends GraphicsProgram {
 	 * наш м'ячик ( як це було вказано у пояснювальному матеріалі до
 	 * лабораторної)
 	 * 
-	 * ВАРІАНТ, ЯКИЙ ЗАКОМЕНТОВАНИЙ: Якщо м'ячик нижньою центральною точкою
+	 * ВАРІАНТ, ЯКИЙ НЕ ЗАКОМЕНТОВАНИЙ: Якщо м'ячик нижньою центральною точкою
 	 * потрапляє на верхню частину дощечки - він відбивається, змінюючи на
 	 * протилежну швидкість vy, тобто змінює на протилежний напрям руху по осі
 	 * у. Якщо ж м'яч вдаряється об бокові стінки крайніми боковими точками, то
 	 * подібно того, як від стінки відбивається у протилежному напрямку по осі х
-	 * і падає вниз.
+	 * і падає вниз. Але відбиття від боків дощечки відбувається, якщо м'ячик
+	 * прилітає з відповідної сторони, від якої може відбитися: тобто від лівої
+	 * частини дощечки він може відбитися, якщо прилітає з лівого боку, від
+	 * правої сторони, якщо прилітає з правого боку, якщо ж на лівий бік
+	 * прилітає з правого боку, чи з лівого боку на правий бік, то відбиття,
+	 * очевидно не спрацьовує і м'ячик падає вниз. Однак обидва варіанти працюють.
 	 */
 	private void collideWithRaquet() {
-
+		/*
 		if (getElementAt(ball.getX(), ball.getY() + 2 * BALL_RADIUS) == paddle) {
 			if (vy > 0)
 				vy = -vy;
@@ -304,20 +305,34 @@ public class BreakOut extends GraphicsProgram {
 			bounceClip.play();
 			return;
 		}
+		*/
+		if (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) == paddle) {
+			if (ball.getY() + 2 * BALL_RADIUS >= paddle.getY()) {
+				bounceClip.play();
+				if (vy > 0)
+					vy = -vy;
+				return;
+			}
+		}
+		if (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) == paddle) {
+			if ((ball.getX() + 2 * BALL_RADIUS >= paddle.getX())) {
+				if (vx > 0){
+					vx = -vx;
+					bounceClip.play();
+				}
+				return;
+			}
+		}
+		if (getElementAt(ball.getX(), ball.getY() + BALL_RADIUS) == paddle) {
+			if (ball.getX() <= paddle.getX() + PADDLE_WIDTH) {
+				if (vx < 0){
+					vx = -vx;
+					bounceClip.play();
+				}
+				return;
+			}
 
-		/*
-		 * if (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 *
-		 * BALL_RADIUS) == paddle) { if (ball.getY() + 2 * BALL_RADIUS >=
-		 * paddle.getY()) { vy = -vy; return; } } if (getElementAt(ball.getX()
-		 * +2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) == paddle) { if
-		 * ((ball.getX() + 2 * BALL_RADIUS >= paddle.getX())) {
-		 * System.out.println(true); vx = -vx; return; } } if
-		 * (getElementAt(ball.getX(), ball.getY() + BALL_RADIUS) == paddle) { if
-		 * (ball.getX() <= paddle.getX() + PADDLE_WIDTH) {
-		 * System.out.println(true); vx = -vx; return; }
-		 * 
-		 * }
-		 */
+		}
 
 	}
 
@@ -330,15 +345,15 @@ public class BreakOut extends GraphicsProgram {
 	 * протилежну швидкість по осі x. Для того, аби це булj краще видно
 	 * (відбиття від різних частин цеглинки, краще зробити висоти цеглибки
 	 * більшою, ніж була дана нам у файлі "starter", або ж зменшити величину
-	 * м'яча (у підсумку ми змінили висоту цеглинок). Зазначимо,
-	 * що метод перевіряє зіткнення не з точками, які є за межами кола (вершини
-	 * квадрата у який вписаний наш м'ячик), як це було дано в пояснювальному
-	 * матеріалі до лабораторної, а перевіряє безпосередньо чотири точки на
-	 * колі. Успішної перевірки колізій з точками на колі вдалося досягти
-	 * завдяки тому, що при створенні м'ячик переміщується на задній план. Таким
-	 * чином, коли ми беремо елемент у точці, то програма повертає нам не м'ячик
-	 * (як було б, якби м'яч був на передньому плані), а цеглинку, тому що всі
-	 * інші елементи, які можуть бути на полі наш метод перевірки колізій з
+	 * м'яча (у підсумку ми змінили висоту цеглинок). Зазначимо, що метод
+	 * перевіряє зіткнення не з точками, які є за межами кола (вершини квадрата
+	 * у який вписаний наш м'ячик), як це було дано в пояснювальному матеріалі
+	 * до лабораторної, а перевіряє безпосередньо чотири точки на колі. Успішної
+	 * перевірки колізій з точками на колі вдалося досягти завдяки тому, що при
+	 * створенні м'ячик переміщується на задній план. Таким чином, коли ми
+	 * беремо елемент у точці, то програма повертає нам не м'ячик (як було б,
+	 * якби м'яч був на передньому плані), а цеглинку, тому що всі інші
+	 * елементи, які можуть бути на полі наш метод перевірки колізій з
 	 * цеглинками ігнорує
 	 */
 	private void collideWithBricks() {
@@ -353,14 +368,10 @@ public class BreakOut extends GraphicsProgram {
 			vy = -vy;
 			return;
 		}
-		if ((getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()
-				+ BALL_RADIUS) != null)
-				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()
-						+ BALL_RADIUS) != paddle)
-				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()
-						+ BALL_RADIUS) != ball)) {
-			collider = getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY()
-					+ BALL_RADIUS);
+		if ((getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) != null)
+				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) != paddle)
+				&& (getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS) != ball)) {
+			collider = getElementAt(ball.getX() + 2 * BALL_RADIUS, ball.getY() + BALL_RADIUS);
 			remove(collider);
 			collider = null;
 			bricksQuantity--;
@@ -368,14 +379,10 @@ public class BreakOut extends GraphicsProgram {
 			vx = -vx;
 			return;
 		}
-		if ((getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2
-				* BALL_RADIUS) != null)
-				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2
-						* BALL_RADIUS) != paddle)
-				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2
-						* BALL_RADIUS) != ball)) {
-			collider = getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2
-					* BALL_RADIUS);
+		if ((getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != null)
+				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != paddle)
+				&& (getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS) != ball)) {
+			collider = getElementAt(ball.getX() + BALL_RADIUS, ball.getY() + 2 * BALL_RADIUS);
 			remove(collider);
 			collider = null;
 			bricksQuantity--;
